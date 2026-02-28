@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { createOrder, fetchProducts } from "./api";
+import { createOrder, demoProducts, fetchProducts, isApiConfigured } from "./api";
 import ProductList from "./components/ProductList.jsx";
 import Cart from "./components/Cart.jsx";
 
@@ -28,7 +28,10 @@ export default function App() {
         const data = await fetchProducts();
         if (mounted) setProducts(data || []);
       } catch (err) {
-        if (mounted) setProductError("Failed to load products.");
+        if (mounted) {
+          setProducts(demoProducts);
+          setProductError("Backend unreachable — showing demo products.");
+        }
       } finally {
         if (mounted) setLoadingProducts(false);
       }
@@ -118,7 +121,11 @@ export default function App() {
         `Order #${saved.id} placed successfully. Total: ${toMoney(saved.totalPrice)}`,
       );
     } catch (err) {
-      setSubmitError("Checkout failed. Please try again.");
+      const message =
+        err?.message === "Backend not configured (VITE_API_URL missing)."
+          ? "Backend not configured. Set VITE_API_URL in Vercel to enable checkout."
+          : "Checkout failed. Please try again.";
+      setSubmitError(message);
     } finally {
       setSubmitting(false);
     }
@@ -130,7 +137,7 @@ export default function App() {
         <div className="brand">
           <div className="brand-title">Mini E-Commerce</div>
           <div className="brand-subtitle">
-            {import.meta.env.VITE_API_URL ? "Connected" : "Set VITE_API_URL"}
+            {isApiConfigured ? "Connected" : "Demo mode (set VITE_API_URL)"}
           </div>
         </div>
       </header>
@@ -138,12 +145,19 @@ export default function App() {
       <main className="layout">
         <section className="left">
           <div className="section-title">Products</div>
+          {!isApiConfigured ? (
+            <div className="info">
+              Showing demo products. Set <code>VITE_API_URL</code> to load products from your
+              backend.
+            </div>
+          ) : null}
           {loadingProducts ? (
             <div className="muted">Loading products…</div>
-          ) : productError ? (
-            <div className="error">{productError}</div>
           ) : (
-            <ProductList products={products} onAddToCart={addToCart} />
+            <>
+              {productError ? <div className="info">{productError}</div> : null}
+              <ProductList products={products} onAddToCart={addToCart} />
+            </>
           )}
         </section>
 
@@ -196,4 +210,3 @@ export default function App() {
     </div>
   );
 }
-

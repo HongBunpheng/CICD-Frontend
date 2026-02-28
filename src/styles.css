@@ -319,6 +319,15 @@ code {
   color: rgba(255, 255, 255, 0.92);
 }
 
+.info {
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.12);
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 12px;
+}
+
 .footer {
   padding: 18px;
   display: flex;
@@ -346,4 +355,3 @@ code {
     align-items: flex-start;
   }
 }
-
